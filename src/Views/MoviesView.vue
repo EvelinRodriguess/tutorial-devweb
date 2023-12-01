@@ -2,16 +2,22 @@
 import { ref, onMounted } from 'vue'
 import api from '@/plugins/axios'
 import Loading from 'vue-loading-overlay'
+import useGenreStore from '@/stores/genre';
 
+const genreStore = useGenreStore();
 
 const isLoading = ref(false);
 const genres = ref([])
+
 const getGenreName = (id) => genres.value.find((genre) => genre.id === id).name
+const formatDate = (date) => new Date(date).toLocaleDateString('pt-BR')
+
 
 onMounted(async () => {
-  const response = await api.get('genre/movie/list?language=pt-BR')
-  genres.value = response.data.genres
-})
+  isLoading.value = true;
+  await genreStore.getAllGenres('movie');
+  isLoading.value = false;
+});
 const movies = ref([]);
 
 const listMovies = async (genreId) => {
@@ -26,15 +32,20 @@ const listMovies = async (genreId) => {
   isLoading.value = false;
 };
 
-const formatDate = (date) => new Date(date).toLocaleDateString('pt-BR')
+
 
 </script>
 
 <template>
   <h1>Filmes</h1>
   <ul class="genre-list">
-    <li v-for="genre in genres" :key="genre.id" @click="listMovies(genre.id)" class="genre-item">
-    {{ genre.name }}
+    <li
+  v-for="genre in genreStore.genres"
+  :key="genre.id"
+  @click="listMovies(genre.id)"
+  class="genre-item"
+>
+   {{ genre.name }} 
 </li>
   </ul>
   <loading v-model:active="isLoading" is-full-page />
@@ -48,9 +59,13 @@ const formatDate = (date) => new Date(date).toLocaleDateString('pt-BR')
       <p class="movie-title">{{ movie.title }}</p>
       <p class="movie-release-date">{{ formatDate(movie.release_date) }}</p>
       <p class="movie-genres">{{ movie.genre_ids }}
-        <span v-for="genre_id in movie.genre_ids" :key="genre_id" @click="listMovies(genre_id)">
-    {{ getGenreName(genre_id) }} 
-  </span>
+        <span
+  v-for="genre_id in movie.genre_ids"
+  :key="genre_id"
+  @click="listMovies(genre_id)"
+>
+  {{ genreStore.getGenreName(genre_id) }}
+</span>
     </p>
 
     </div>

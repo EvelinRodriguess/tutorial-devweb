@@ -28,12 +28,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-nav {
-  display: flex;
-  justify-content: flex-start;
-  margin-bottom: 1rem;
-  column-gap: 2rem;
-}
 
 header {
   height: 3rem;
